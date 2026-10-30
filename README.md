@@ -90,6 +90,9 @@ Then follow steps 1 to 4 below.
 4. In **Authentication → Providers** keep *Email* enabled. For a private installation you may switch off
    "Allow new users to sign up" after you create your own account.
 5. Configure an SMTP server under **Authentication → SMTP** so confirmation and password-reset emails are delivered.
+6. Optional: enable **Google** and/or **Apple** under **Authentication → Providers**. The sign-in page then shows
+   "Continue with Google / Apple" automatically, and the mobile app does too. Add `operix-invoice://auth-callback` to the
+   redirect allow-list for the mobile app. Step-by-step instructions: [docs/SOCIAL-SIGN-IN.md](docs/SOCIAL-SIGN-IN.md).
 
 ## 2. Set up the database
 
@@ -205,12 +208,25 @@ All settings live in `.env.example` with comments. The important ones:
 | `NEXT_PUBLIC_INVOICE_APP_URL` | yes | Public address of this app. Used in QR codes on invoices and in links. |
 | `NEXT_PUBLIC_SELF_HOSTED` | recommended | `true` hides the hosted billing and subscription screens. |
 | `NEXT_PUBLIC_SERVER_NAME` | no | Name shown in the mobile app when connecting. |
+| `NEXT_PUBLIC_PAYWALL_ENABLED` | no | `true` shows a subscription paywall on cloud workspaces without an active Stripe subscription (hosted service). Always off when `NEXT_PUBLIC_SELF_HOSTED=true`. |
 | `NEXT_PUBLIC_POS_ENABLED` | no | `true` enables the point of sale. Read the [notice](#important-notices) first. |
 | `CRON_SECRET` | recommended | Protects `/api/cron/*` maintenance endpoints. |
 | `CHROME_EXECUTABLE_PATH` | for PDFs | Path to Chromium (set in the Docker image). |
 | `STRIPE_*` | no | Only if you sell subscriptions. See below. |
 
 ## Optional features
+
+- **Push notifications to your team (mobile app).** When someone issues an invoice, records a payment or expense,
+  a new member joins, stock runs low, and so on, the database queues a notification and the web app sends it to the
+  other people who may see that data. Setup: set `PUSH_DISPATCH_SECRET` (or reuse `CRON_SECRET`) on the web app, then in
+  the Supabase SQL editor:
+  ```sql
+  select vault.create_secret('https://YOUR-DOMAIN/api/internal/push-dispatch', 'push_dispatch_url');
+  select vault.create_secret('THE-SAME-SECRET', 'push_dispatch_secret');
+  ```
+  It needs the `pg_net` extension (enabled by default on Supabase). Calling `GET /api/internal/push-dispatch` with the
+  secret on a schedule is a safety net. Phones need a build that registers Expo push tokens; people choose what they
+  receive under Settings → Notifications in the app.
 
 - **Stripe subscriptions.** The code includes Stripe Billing (checkout, customer portal, webhooks). A private,
   self-hosted installation does not need it: leave `NEXT_PUBLIC_SELF_HOSTED=true`. To sell subscriptions to

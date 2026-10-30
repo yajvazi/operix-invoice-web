@@ -22,6 +22,8 @@ export interface SaveInvoiceOptions {
   existingInvoiceId?: string | null;
   postInvoice?: boolean;
   replacePostedInvoice?: boolean;
+  /** Company administrators only: correct a posted invoice that issued stock (returns the old stock, issues the new). */
+  adminStockCorrectionReason?: string;
   stockCheckout?: boolean;
   idempotencyKey?: string | null;
 }
@@ -319,7 +321,15 @@ export async function saveInvoiceDocument(client: SupabaseClient, options: SaveI
   const saveRpc = draft.externalReference !== undefined
     ? 'save_invoice_document_with_external_reference'
     : 'save_invoice_document';
-  const saved = options.replacePostedInvoice && existingInvoiceId
+  const saved = options.replacePostedInvoice && existingInvoiceId && options.adminStockCorrectionReason
+    ? await unwrap<unknown>(client.rpc('admin_correct_stock_invoice', {
+      p_invoice: persistence.invoice,
+      p_items: persistence.items,
+      p_invoice_id: existingInvoiceId,
+      p_reason: options.adminStockCorrectionReason,
+      p_idempotency_key: idempotencyKey,
+    }))
+    : options.replacePostedInvoice && existingInvoiceId
     ? await unwrap<unknown>(client.rpc('replace_posted_invoice_document', {
       p_invoice: persistence.invoice,
       p_items: persistence.items,
@@ -803,6 +813,15 @@ export async function applySalesBookAmendment(
 
 export async function deleteInvoice(client: SupabaseClient, invoiceId: string) {
   await unwrap<unknown>(client.rpc('delete_invoice', { p_invoice_id: invoiceId }));
+}
+
+/**
+ * Company administrators only: deletes an invoice that was already posted. The database reverses its accounting
+ * entries, restores stock and keeps an audit record with the reason. Invoices declared in the Sales Book,
+ * with fiscal receipts, or tied to other documents are refused with a clear message.
+ */
+export async function adminDeleteInvoice(client: SupabaseClient, invoiceId: string, reason: string) {
+  await unwrap<unknown>(client.rpc('admin_delete_invoice', { p_invoice_id: invoiceId, p_reason: reason }));
 }
 
 export function transitionInvoiceStatus(client: SupabaseClient, invoiceId: string, status: string, eventType: string) {
