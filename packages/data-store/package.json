@@ -1,0 +1,28 @@
+{
+  "name": "@invoice-monorepo/data-store",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./local": "./src/local.ts",
+    "./cloud": "./src/cloud.ts",
+    "./drivers/node-sqlite": "./src/drivers/node-sqlite.ts",
+    "./drivers/expo-sqlite": "./src/drivers/expo-sqlite.ts",
+    "./drivers/sqlite-wasm": "./src/drivers/sqlite-wasm.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "node --test src/local.test.ts src/features.test.ts src/drivers.test.ts src/reports.test.ts src/transfer.test.ts"
+  },
+  "dependencies": {
+    "@invoice-monorepo/api": "*",
+    "@invoice-monorepo/commercial-documents": "*",
+    "@invoice-monorepo/money": "*"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.2"
+  }
+}

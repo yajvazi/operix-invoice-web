@@ -1,0 +1,26 @@
+{
+    "name": "@invoice-monorepo/api",
+    "version": "1.0.0",
+    "private": true,
+    "main": "./src/index.ts",
+    "types": "./src/index.ts",
+    "exports": {
+        ".": "./src/index.ts",
+        "./domain": "./src/domain.ts",
+        "./repositories": "./src/repositories.ts",
+        "./workspace": "./src/workspace.ts"
+    },
+    "dependencies": {
+        "@invoice-monorepo/commercial-documents": "*",
+        "@invoice-monorepo/money": "*",
+        "@invoice-monorepo/types": "*",
+    "@supabase/supabase-js": "^2.89.0"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "node --test src/domain.test.ts src/workspace.test.ts src/financial.test.ts src/expense-domain.test.ts src/data-transfer.test.ts"
+    },
+    "peerDependencies": {
+        "react": "*"
+    }
+}

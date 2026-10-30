@@ -1,0 +1,35 @@
+{
+  "name": "operix-invoice",
+  "version": "1.0.0",
+  "private": true,
+  "license": "AGPL-3.0-only",
+  "description": "OperiX Invoice: open-source invoicing and accounting web app",
+  "packageManager": "npm@10.9.4",
+  "workspaces": [
+    "apps/OperiX Invoice/OperiX Web",
+    "packages/accounting",
+    "packages/api",
+    "packages/app-shell",
+    "packages/billing",
+    "packages/commercial-documents",
+    "packages/data-store",
+    "packages/invoice-template",
+    "packages/money",
+    "packages/operix-ui",
+    "packages/payroll",
+    "packages/public-api",
+    "packages/report-templates",
+    "packages/types"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w web-suite",
+    "build": "npm run build -w web-suite",
+    "start": "npm run start -w web-suite",
+    "lint": "npm run lint -w web-suite",
+    "typecheck": "npm run typecheck -w web-suite",
+    "test": "npm run test -w web-suite"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.2"
+  }
+}
